@@ -6,6 +6,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from langchain_groq import ChatGroq
 from langchain.agents import initialize_agent, Tool, AgentType
 from langchain.schema import SystemMessage
+from langchain.memory import ConversationBufferMemory
 
 
 # === Load API keys ===
@@ -165,25 +166,47 @@ tools = [
 
 
 # === Build Agent ===
+# agent = initialize_agent(
+#     tools,
+#     llm,
+#     agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
+#     verbose=False,
+#     agent_kwargs={
+#         "system_message": SystemMessage(
+#             content="Kamu adalah asisten nutrisi yang selalu menjawab dalam bahasa Indonesia. "
+#                     "Berikan hasil yang jelas, ramah, dan sertakan sedikit penjelasan agar mudah dipahami."
+#         )
+#     }
+# )
 agent = initialize_agent(
     tools,
     llm,
-    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION,
-    verbose=False,
+    agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+    verbose=True,
+    memory=ConversationBufferMemory(memory_key="chat_history", return_messages=True),
     agent_kwargs={
         "system_message": SystemMessage(
-            content="Kamu adalah asisten nutrisi yang selalu menjawab dalam bahasa Indonesia. "
-                    "Berikan hasil yang jelas, ramah, dan sertakan sedikit penjelasan agar mudah dipahami."
+            content=(
+                "Kamu adalah asisten nutrisi dalam bahasa Indonesia. "
+                "Jika pengguna meminta perhitungan (BMI, BMR, kalori, makro, dll) "
+                "tapi belum memberi semua data yang dibutuhkan (seperti berat, tinggi, umur, atau gender), "
+                "jangan langsung hitung. Sebaliknya, tanyakan dulu data yang kurang "
+                "dengan ramah. "
+                "Jika semua data sudah lengkap, barulah panggil tool yang sesuai."
+            )
         )
     }
 )
 
 
+
 # === Contoh interaksi ===
 if __name__ == "__main__":
-    print(agent.run("Hitung BMI saya berat 70kg tinggi 175cm"))
-    print(agent.run("Saya laki-laki umur 25, berat 70kg, tinggi 175cm. Hitung BMR saya"))
-    print(agent.run("Kalau BMR saya 1700 dan aktivitas moderate, berapa kebutuhan kalori harian saya?"))
-    print(agent.run("Hitung makronutrien dari 2500 kalori"))
-    print(agent.run("Cari tahu nutrisi Abon"))
-    print(agent.run("Bandingkan nutrisi Abon dan Abon haruwan"))
+    # print(agent.run("Hitung BMI saya berat 70kg tinggi 175cm"))
+    # print(agent.run("Saya laki-laki umur 25, berat 70kg, tinggi 175cm. Hitung BMR saya"))
+    # print(agent.run("Kalau BMR saya 1700 dan aktivitas moderate, berapa kebutuhan kalori harian saya?"))
+    # print(agent.run("Hitung makronutrien dari 2500 kalori"))
+    # print(agent.run("Cari tahu nutrisi Abon"))
+    # print(agent.run("Bandingkan nutrisi Abon dan Abon haruwan"))
+    print(agent.run("apakah kamu bisa hitung bmi saya?"))
+    # print(agent.run("Hitung BMI saya berat 54kg tinggi 169cm"))
