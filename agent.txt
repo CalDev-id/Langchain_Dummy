@@ -1,0 +1,54 @@
+🔹 Daftar AgentType Populer di LangChain
+1. ZERO_SHOT_REACT_DESCRIPTION
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION
+)
+Default / klasik.
+Agent pakai prompt ReAct (Reasoning + Acting).
+Gunakan deskripsi tool untuk memutuskan tool mana yang dipakai.
+Contoh: "Gunakan Search untuk mencari berita terbaru".
+2. CHAT_ZERO_SHOT_REACT_DESCRIPTION
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.CHAT_ZERO_SHOT_REACT_DESCRIPTION
+)
+Mirip ZERO_SHOT_REACT_DESCRIPTION, tapi lebih cocok untuk model chat (seperti LLaMA, GPT).
+Output lebih natural, biasanya direkomendasikan kalau pakai ChatGroq atau ChatOpenAI.
+3. CONVERSATIONAL_REACT_DESCRIPTION
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.CONVERSATIONAL_REACT_DESCRIPTION,
+    memory=ConversationBufferMemory()
+)
+Sama seperti CHAT_ZERO_SHOT_REACT_DESCRIPTION tapi dengan memory percakapan.
+Jadi bisa nyambung:
+Kamu: “Siapa presiden Indonesia?”
+Agent: “Joko Widodo.”
+Kamu: “Umurnya berapa dikali 3?”
+Agent: inget konteks bahwa “umurnya” = Jokowi.
+4. STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION
+)
+Sama dengan chat agent, tapi structured → LLM menghasilkan JSON-like output untuk memilih tool.
+Lebih aman karena LLM dipaksa memilih dengan format tertentu.
+Cocok kalau kamu punya banyak tools, supaya nggak ngawur pilihannya.
+5. OPENAI_FUNCTIONS (atau create_openai_functions_agent)
+agent = initialize_agent(
+    tools=tools,
+    llm=llm,
+    agent=AgentType.OPENAI_FUNCTIONS
+)
+Agent yang pakai function calling (mirip OpenAI GPT-4 Function Calling).
+Kalau LLM mendukung format function call → bisa memanggil tool langsung tanpa prompt hack.
+Di Groq, ini tergantung apakah model support format function-call. Kalau enggak, lebih aman pakai STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION.
+🔹 Rekomendasi Buat Kamu (pakai Groq LLaMA)
+Kalau eksperimen awal → pakai CHAT_ZERO_SHOT_REACT_DESCRIPTION.
+Kalau butuh multi-turn dengan memory → pakai CONVERSATIONAL_REACT_DESCRIPTION.
+Kalau punya banyak tools dan mau output rapi → pakai STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION.
