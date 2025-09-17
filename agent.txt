@@ -52,3 +52,40 @@ Di Groq, ini tergantung apakah model support format function-call. Kalau enggak,
 Kalau eksperimen awal → pakai CHAT_ZERO_SHOT_REACT_DESCRIPTION.
 Kalau butuh multi-turn dengan memory → pakai CONVERSATIONAL_REACT_DESCRIPTION.
 Kalau punya banyak tools dan mau output rapi → pakai STRUCTURED_CHAT_ZERO_SHOT_REACT_DESCRIPTION.
+
+
+
+Kalau fungsi yang kamu buat butuh lebih dari 1 parameter, biasanya ada 2 cara dalam LangChain:
+✅ 1. Terima str lalu parse di dalam fungsi
+Contoh:
+def tambah(a: int, b: int):
+    return a + b
+
+def add_numbers(x: str):
+    # asumsikan input selalu dalam format "angka1, angka2"
+    parts = x.split(",")
+    a, b = int(parts[0].strip()), int(parts[1].strip())
+    return tambah(a, b)
+
+tool = Tool(
+    name="Adder",
+    func=add_numbers,
+    description="Gunakan untuk menjumlahkan dua angka. Format input: 'angka1, angka2'."
+)
+Agent akan kasih string "5, 7", lalu fungsi akan parse jadi (5,7) → hasil 12.
+Ini cara paling umum karena LLM suka pakai teks biasa.
+✅ 2. Pakai StructuredTool (lebih rapi, param-nya jelas)
+Kalau kamu pakai LangChain yang agak baru, ada StructuredTool (atau @tool decorator) yang bisa langsung definisikan parameter kaya API.
+Contoh:
+from langchain.tools import StructuredTool
+
+def bagi(a: float, b: float) -> float:
+    """Membagi angka a dengan b."""
+    return a / b
+
+bagi_tool = StructuredTool.from_function(bagi)
+Nanti agent tahu bagi butuh a dan b, bukan sekadar str.
+Kalau dipanggil, agent bisa kasih input seperti:
+Action: bagi
+Action Input: {"a": 10, "b": 2}
+dan LangChain akan otomatis map ke bagi(10,2) → hasil 5.
